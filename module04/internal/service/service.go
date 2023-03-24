@@ -3,10 +3,10 @@ package service
 import (
 	"errors"
 	"fmt"
-	"udmey/module04-03/internal/model/customer"
-	"udmey/module04-03/internal/model/debtor"
-	"udmey/module04-03/internal/model/discounter"
-	"udmey/module04-03/internal/model/partner"
+	"udmey/module04/internal/model/customer"
+	"udmey/module04/internal/model/debtor"
+	"udmey/module04/internal/model/discounter"
+	"udmey/module04/internal/model/partner"
 )
 
 const DEFAULT_DISCOUNT = 20

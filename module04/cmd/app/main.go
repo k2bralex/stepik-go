@@ -1,6 +1,6 @@
 package main
 
-import "udmey/module04-03/internal/service"
+import "udmey/module04/internal/service"
 
 func main() {
 	service.Run()
