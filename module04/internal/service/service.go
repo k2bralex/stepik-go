@@ -28,14 +28,6 @@ func Run() {
 
 	fmt.Println(cust)
 	fmt.Println(part)
-
-	/*price, err := calcPrice(cust, 399.99)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	fmt.Printf("Final price: %.2f\n", price)*/
 }
 
 func startDynamicTransaction(t interface{}) error {
