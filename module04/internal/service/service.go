@@ -15,9 +15,15 @@ func Run() {
 	cust := customer.NewCustomer("Alex", 20, 20000.32, 0, false)
 	part := partner.NewPartner("John", 40, 78000, 300)
 
+	fmt.Println(cust)
+	fmt.Println(part)
+
+	if err := startDynamicTransaction(cust); err != nil {
+		fmt.Println(err.Error())
+	}
+
 	if err := startDynamicTransaction(part); err != nil {
 		fmt.Println(err.Error())
-		return
 	}
 
 	fmt.Println(cust)
@@ -32,10 +38,10 @@ func Run() {
 	fmt.Printf("Final price: %.2f\n", price)*/
 }
 
-func startDynamicTransaction(d debtor.Debtor) error {
-	switch d.(type) {
+func startDynamicTransaction(t interface{}) error {
+	switch t.(type) {
 	case *partner.Partner:
-		return d.WrOffDebt()
+		return t.(debtor.Debtor).WrOffDebt()
 	default:
 		return errors.New("incorrect type")
 	}
