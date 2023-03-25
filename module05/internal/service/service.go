@@ -2,30 +2,23 @@ package service
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
 func Run() {
 	var (
-		ch   = make(chan []int)
 		num1 = 45
 		num2 = 46
+		wg   = sync.WaitGroup{}
 	)
 
-	go fibRun(ch, num1)
-	go fibRun(ch, num2)
+	wg.Add(2)
+	go fibRun(&wg, num1)
+	go fibRun(&wg, num2)
 	go spinner()
 
-	count := 0
-	for v := range ch {
-		fmt.Printf("\rFibonacci(%d) = %d\n", v[0], v[1])
-		count++
-		if count == 2 {
-			close(ch)
-		}
-	}
-
-	return
+	wg.Wait()
 }
 
 func spinner() {
@@ -44,7 +37,8 @@ func fib(n int) int {
 	return fib(n-1) + fib(n-2)
 }
 
-func fibRun(c chan []int, num int) {
+func fibRun(wg *sync.WaitGroup, num int) {
 	res := fib(num)
-	c <- []int{num, res}
+	fmt.Printf("\rFibonacci(%d) = %d\n", num, res)
+	wg.Done()
 }
