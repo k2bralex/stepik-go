@@ -1,4 +1,4 @@
-package internal
+package util
 
 import (
 	"errors"
@@ -34,4 +34,41 @@ func ReverseNumber(val interface{}) (interface{}, error) {
 	default:
 		return nil, errors.New("incorrect type")
 	}
+}
+
+func IsPalindrome(number int) bool {
+	var remainder, temp int
+	var reverse = 0
+
+	temp = number
+
+	for {
+		remainder = number % 10
+		reverse = reverse*10 + remainder
+		number /= 10
+
+		if number == 0 {
+			break
+		}
+	}
+
+	if temp == reverse {
+		return true
+	}
+	return false
+}
+
+func ContainsDuplicate(nums []int) bool {
+	tmp := make(map[int]int)
+
+	for _, v := range nums {
+
+		tmp[v]++
+
+		if tmp[v] > 1 {
+			return true
+		}
+	}
+
+	return false
 }

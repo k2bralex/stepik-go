@@ -1,11 +1,12 @@
-package internal
+package test
 
 import (
 	"testing"
+	"udmey/module06/internal/util"
 )
 
 func TestPositiveInt(t *testing.T) {
-	token, err := ReverseNumber(1212)
+	token, err := util.ReverseNumber(1212)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -15,7 +16,7 @@ func TestPositiveInt(t *testing.T) {
 }
 
 func TestNegativeInt(t *testing.T) {
-	token, err := ReverseNumber(-1212)
+	token, err := util.ReverseNumber(-1212)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -25,7 +26,7 @@ func TestNegativeInt(t *testing.T) {
 }
 
 func TestZeroValue(t *testing.T) {
-	token, err := ReverseNumber(0)
+	token, err := util.ReverseNumber(0)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -35,7 +36,7 @@ func TestZeroValue(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	token, err := ReverseNumber("1212")
+	token, err := util.ReverseNumber("1212")
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -45,7 +46,7 @@ func TestString(t *testing.T) {
 }
 
 func TestInvalidType(t *testing.T) {
-	_, err := ReverseNumber(12.22)
+	_, err := util.ReverseNumber(12.22)
 	if err == nil {
 		t.Error(err.Error())
 	}
