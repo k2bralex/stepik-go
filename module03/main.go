@@ -13,7 +13,31 @@ import (
 )
 
 func main() {
+	file, err := os.Open("/Users/oleksiibrahanets/GolandProjects/udemy/module03/data.json")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
+	defer file.Close()
+
+	var props []Properties
+
+	body, err := io.ReadAll(file)
+
+	err = json.Unmarshal(body, &props)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	sum := int64(0)
+	for _, v := range props {
+		sum += int64(v.GlobalID)
+	}
+	fmt.Println(sum)
+
+}
+
+type Properties struct {
+	GlobalID int `json:"global_id"`
 }
 
 func AveregeStudentsRating() {
