@@ -6,14 +6,234 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 	"unicode"
 )
 
+const N = 5
+
 func main() {
-	file, err := os.Open("/Users/oleksiibrahanets/GolandProjects/udemy/module03/data.json")
+	fn := func(x int) int {
+		time.Sleep(time.Duration(rand.Int31n(N)) * time.Second)
+		return x * 2
+	}
+	in1 := make(chan int, N)
+	in2 := make(chan int, N)
+	out := make(chan int, N)
+
+	start := time.Now()
+	merge2Channels(fn, in1, in2, out, N+1)
+	for i := 0; i < N+1; i++ {
+		in1 <- i
+		in2 <- i
+	}
+
+	orderFail := false
+	EvenFail := false
+	for i, prev := 0, 0; i < N; i++ {
+		fmt.Println("getting res ", i)
+		c := <-out
+		fmt.Println("received res", i)
+		if c%2 != 0 {
+			EvenFail = true
+		}
+		if prev >= c && i != 0 {
+			orderFail = true
+		}
+		prev = c
+		fmt.Println(c)
+	}
+	if orderFail {
+		fmt.Println("порядок нарушен")
+	}
+	if EvenFail {
+		fmt.Println("Есть не четные")
+	}
+	duration := time.Since(start)
+	if duration.Seconds() > N {
+		fmt.Println("Время превышено")
+	}
+	fmt.Println("Время выполнения: ", duration)
+}
+
+func merge2Channels(fn func(int) int, in1 <-chan int, in2 <-chan int, out chan<- int, n int) {
+
+	go func() {
+		wg := &sync.WaitGroup{}
+		out1 := []int{}
+		out2 := []int{}
+
+		wg.Add(2 * n)
+
+		for i := 0; i < n; i++ {
+			out1 = append(out1, <-in1)
+			out2 = append(out2, <-in2)
+		}
+
+		for i := 0; i < n; i++ {
+			go func(index, value int, sl *[]int) {
+				defer wg.Done()
+				(*sl)[index] = fn(value)
+			}(i, out1[i], &out1)
+
+			go func(index, value int, sl *[]int) {
+				defer wg.Done()
+				(*sl)[index] = fn(value)
+			}(i, out2[i], &out2)
+		}
+
+		go func(sl1, sl2 *[]int, w *sync.WaitGroup) {
+
+			w.Wait()
+
+			for i := 0; i < n; i++ {
+				out <- (*sl1)[i] + (*sl2)[i]
+			}
+
+			close(out)
+		}(&out1, &out2, wg)
+
+	}()
+
+}
+
+func calculator1(arguments <-chan int, done <-chan struct{}) <-chan int {
+	out := make(chan int)
+
+	go func() {
+		defer close(out)
+		sum := 0
+		for {
+			select {
+			case <-done:
+				out <- sum
+				return
+			case val := <-arguments:
+				sum += val
+			}
+		}
+	}()
+
+	return out
+}
+
+func calculator(firstChan <-chan int, secondChan <-chan int, stopChan <-chan struct{}) <-chan int {
+	out := make(chan int)
+
+	go func() {
+		defer close(out)
+		select {
+		case <-stopChan:
+		case val := <-firstChan:
+			out <- val * val
+		case val := <-secondChan:
+			out <- val * 3
+		}
+	}()
+
+	return out
+}
+
+func WaitGroups() {
+	var wg sync.WaitGroup
+
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			work1()
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+}
+
+func SyncGourutinesPattern() {
+	<-WrapWork(work1)
+}
+
+func WrapWork(f func()) <-chan struct{} {
+	ch := make(chan struct{})
+	go func() {
+		work1()
+		close(ch)
+	}()
+	return ch
+}
+
+func work1() {
+
+}
+
+func removeDuplicates(inputStream, outputStream chan string) {
+	defer close(outputStream)
+	lib := map[string]int{}
+	for in := range inputStream {
+		if _, ok := lib[in]; !ok {
+			lib[in] = 1
+			outputStream <- in
+			continue
+		}
+	}
+}
+
+func TimePlusDuration() {
+
+	const now = 1589570165
+
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	s := scanner.Text()
+
+	s = strings.ReplaceAll(s, " мин. ", "m")
+	s = strings.ReplaceAll(s, " сек.", "s")
+
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		panic(err)
+	}
+
+	nano := int64(d.Seconds())
+
+	fmt.Println(time.Unix(now+nano, 0).UTC().Format(time.UnixDate))
+}
+
+func DurationBetweenDate() {
+	s, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	sl := strings.Split(strings.TrimSuffix(s, "\n"), ",")
+
+	t1, err := time.Parse("02.01.2006 15:04:05", sl[0])
+	if err != nil {
+		panic(err)
+	}
+	t2, err := time.Parse("02.01.2006 15:04:05", sl[1])
+	if err != nil {
+		panic(err)
+	}
+
+	r := t1.Sub(t2)
+	if r < 0 {
+		r = t2.Sub(t1)
+	}
+
+	dur, err := time.ParseDuration(r.String())
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(dur.String())
+}
+
+func ReadJsonFromFile() {
+	file, err := os.Open("")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -33,7 +253,6 @@ func main() {
 		sum += int64(v.GlobalID)
 	}
 	fmt.Println(sum)
-
 }
 
 type Properties struct {
